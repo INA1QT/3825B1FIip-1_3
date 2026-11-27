@@ -3,7 +3,6 @@ TSet::TSet(int mp) : MaxPower(mp), BitField(mp) {
 }
 TSet::TSet(const TSet& s) : MaxPower(s.MaxPower), BitField(s.BitField) {
 }
-
 TSet::TSet(const TBitField& bf) : MaxPower(bf.GetLength()), BitField(bf) {
 }
 TSet::operator TBitField() {
@@ -21,7 +20,6 @@ void TSet::DelElem(const int Elem) {
 int TSet::IsMember(const int Elem) const {
     return BitField.GetBit(Elem);
 }
-
 int TSet::operator==(const TSet& s) const {
     return (BitField == s.BitField) && (MaxPower == s.MaxPower);
 }
@@ -48,37 +46,46 @@ TSet TSet::operator-(const int Elem) {
     return res;
 }
 TSet TSet::operator+(const TSet& s) {
-    int maxPower = MaxPower > s.MaxPower ? MaxPower : s.MaxPower;
-    TSet res(maxPower);
+    if (MaxPower != s.MaxPower) {
+        throw std::invalid_argument("Different set powers");
+    }
+    TSet res(MaxPower);
     res.BitField = BitField | s.BitField;
     return res;
 }
 TSet TSet::operator*(const TSet& s) {
-    int maxPower = MaxPower > s.MaxPower ? MaxPower : s.MaxPower;
-    TSet res(maxPower);
+    if (MaxPower != s.MaxPower) {
+        throw std::invalid_argument("Different set powers");
+    }
+    TSet res(MaxPower);
     res.BitField = BitField & s.BitField;
     return res;
 }
-TSet TSet::operator~(void) {
+TSet TSet::operator~() {
     TSet res(~BitField);
     return res;
 }
 std::istream& operator>>(std::istream& is, TSet& s) {
-    int elem;
     char ch;
-    do {
-        is >> ch;
-    } while (ch != '{');
-
-    do {
+    int elem;
+    is >> ch;
+    if (ch != '{') {
+        return is;
+    }
+    while (true) {
         is >> elem;
-
+        if (is.fail()) {
+            break;
+        }
         s.InsElem(elem);
-
         is >> ch;
-
-    } while (ch == ',');
-
+        if (ch == '}') {
+            break;
+        }
+        if (ch != ',') {
+            break;
+        }
+    }
     return is;
 }
 std::ostream& operator<<(std::ostream& os, const TSet& s) {
@@ -89,9 +96,7 @@ std::ostream& operator<<(std::ostream& os, const TSet& s) {
             if (!first) {
                 os << ", ";
             }
-
             os << i;
-
             first = 0;
         }
     }

@@ -64,6 +64,17 @@ TEST(BitField, AndOperation) {
     EXPECT_EQ(1, result.GetBit(5));
     EXPECT_EQ(0, result.GetBit(7));
 }
+TEST(BitField, AndDifferentSize) {
+    TBitField bf1(40);
+    TBitField bf2(10);
+    bf1.SetBit(2);
+    bf1.SetBit(30);
+    bf2.SetBit(2);
+    bf2.SetBit(5);
+    TBitField result = bf1 & bf2;
+    EXPECT_EQ(1, result.GetBit(2));
+    EXPECT_EQ(0, result.GetBit(5));
+}
 TEST(BitField, NotOperation) {
     TBitField bf(5);
     bf.SetBit(2);
@@ -79,6 +90,10 @@ TEST(BitField, OutOfRange) {
     ASSERT_ANY_THROW(bf.SetBit(10));
     ASSERT_ANY_THROW(bf.SetBit(-1));
     ASSERT_ANY_THROW(bf.GetBit(20));
+}
+TEST(BitField, EmptyField) {
+    TBitField bf(0);
+    EXPECT_EQ(0, bf.GetLength());
 }
 TEST(BitField, RandomSetAndGet) {
     srand((unsigned)time(nullptr));
